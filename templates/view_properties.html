@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Properties</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Properties</h1>
+        <a href="{{ url_for('add_property') }}" class="btn btn-success mb-4">Add Property</a>
+        <div class="row">
+            {% for p in properties %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow">
+                        {% if p.images %}
+                            <img src="{{ url_for('static', filename=p.images[0].filename) }}" class="card-img-top" alt="Property Image">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ p.title }}</h5>
+                            <p class="card-text">Price: ${{ p.price }}</p>
+                            <p class="card-text">Location: <a href="https://www.google.com/maps?q={{ p.location }}" target="_blank">{{ p.location }}</a></p>
+                            <p class="card-text">Address: {{ p.address }}</p>
+                            <p class="card-text">Type: {{ p.property_type }}</p>
+                            {% if p.bedrooms %}
+                                <p class="card-text">Bedrooms: {{ p.bedrooms }}</p>
+                            {% endif %}
+                            {% if p.bathrooms %}
+                                <p class="card-text">Bathrooms: {{ p.bathrooms }}</p>
+                            {% endif %}
+                            {% if p.area %}
+                                <p class="card-text">Area: {{ p.area }} sq ft</p>
+                            {% endif %}
+                            <p class="card-text">Amenities: {{ p.amenities }}</p>
+                            <p class="card-text">Owner: {{ p.owner.name }}</p>
+                            <a href="{{ url_for('property_detail', property_id=p.id) }}" class="btn btn-primary">View Details</a>
+                            <button class="btn btn-outline-danger ms-2 favorite-btn" data-property-id="{{ p.id }}">
+                                <i class="fas fa-heart {% if current_user in p.favorited_by %}text-danger{% endif %}"></i>
+                            </button>
+                            {% if p.user_id == current_user.id %}
+                                <a href="{{ url_for('edit_property', property_id=p.id) }}" class="btn btn-warning ms-2">Edit</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Favorite toggle
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.favorite-btn')) {
+                e.preventDefault();
+                const btn = e.target.closest('.favorite-btn');
+                const propertyId = btn.dataset.propertyId;
+                const icon = btn.querySelector('i');
+
+                fetch(`/toggle-favorite/${propertyId}`, { method: 'POST' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.favorited) {
+                            icon.classList.add('text-danger');
+                        } else {
+                            icon.classList.remove('text-danger');
+                        }
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
