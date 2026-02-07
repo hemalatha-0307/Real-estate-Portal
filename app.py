@@ -19,6 +19,7 @@ os.makedirs(uploads_dir, exist_ok=True)
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
+login_manager.session_protection = None
 
 # =====================
 # FAVORITES TABLE (FIX)
